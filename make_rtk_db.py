@@ -12,4 +12,7 @@ info_for_c = {info['c'] : info for info in kanji_infos}
 
 rtk_db_path = './rtk_db.json'
 with open(rtk_db_path, 'w', encoding='utf-8') as rtk_db:
-    json.dump(info_for_c, rtk_db, ensure_ascii=False)
+    json.dump(
+        info_for_c, rtk_db,
+        ensure_ascii=False,
+        separators=(',',':'))

@@ -78,9 +78,14 @@
             text-align: left;
         }
         
+        #dialogue span.selected {
+            background-color: orange;
+        }
+        /*
         #dialogue span:hover {
             background-color: yellow;
         }
+        */
     </style>
     
     <!-- jQuery -->
@@ -97,22 +102,115 @@
             window.rtkDb = data;
         });
         
+        console.log('Loading prefix tree...');
+        $.ajax({
+            url: 'prefix_tree.json',
+            dataType: 'json'
+        }).done(function(data, textStatus, jqXHR) {
+            console.log('Prefix tree loaded.');
+            window.prefixTreeRoot = data;
+        });
+        
+        console.log('Loading EDICT entries...');
+        $.ajax({
+            url: 'edict_entries.json',
+            dataType: 'json'
+        }).done(function(data, textStatus, jqXHR) {
+            console.log('EDICT entries loaded.');
+            window.edictEntries = data;
+        });
+        
         $(function() {
             // Wrap all dialogue characters in spans to make them hoverable
-            var dialogueHtml = $('#dialogue').html();
+            var dialogueHtml = $('#dialogue').html().trim();
             dialogueHtml = dialogueHtml.replace(/(.)/g, '<span>$1</span>');
             $('#dialogue').html(dialogueHtml);
             
-            // Hover over a dialogue character? Lookup the associated kanji.
-            $('#dialogue span').on('mouseenter', function(e) {
-                var c = $(e.target).text();
+            function lookupKanjiForDialogueSpan(target) {
+                var c = $(target).text();
                 var info = window.rtkDb ? window.rtkDb[c] : null;
                 if (!info) {
-                    info = {'k': '?', 'c': c, 'nr': 0}
+                    info = {'k': '?', 'c': c, 'hn': 0}
                 }
                 $('#kanji-info #keyword').text(info['k']);
                 $('#kanji-info #kanji').text(info['c']);
                 $('#kanji-info #nr').text(info['hn']);
+                
+                return c;
+            }
+            
+            function lookupWordForDialogueSpan(target) {
+                // Find the character, and all characters after it
+                var characters = [];
+                var curSpan = $(target);
+                while (curSpan.length > 0) {
+                    characters.push(curSpan.text());
+                    curSpan = curSpan.next();
+                }
+                
+                // Find longest prefix of 'characters' that is a word
+                var longestMatchWord = '';
+                var longestMatchEntry = '0';
+                var parent = window.prefixTreeRoot;
+                for (var i = 0; i<characters.length; i++) {
+                    var c = characters[i];
+                    var child = parent[c];
+                    if (child) {
+                        parent = child;
+                        if (parent['@']) {
+                            longestMatchWord = characters.slice(0, i + 1).join('');
+                            longestMatchEntry = parent['@'];
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                
+                // Lookup entry
+                var entry = window.edictEntries[longestMatchEntry];
+                if (!entry) {
+                    entry = {
+                        'kanjis': [],
+                        'kanas': [],
+                        'glosses': [],
+                        'id': '0'
+                    }
+                }
+                
+                // Update word info box with entry data
+                $('#word-info #word').text(longestMatchWord);
+                $('#word-info #furigana').text(entry.kanas.join('、'));
+                // FIXME: Disallow HTML injection
+                $('#word-info #definition').html(entry.glosses.join('<br/>'));
+                
+                return longestMatchWord;
+            }
+            
+            var lastSelectedSpans = [];
+            
+            // Hover over a dialogue character?
+            $('#dialogue span').on('mouseenter', function(e) {
+                // Lookup the associated kanji.
+                lookupKanjiForDialogueSpan(e.target);
+                // Lookup the associated word.
+                var word = lookupWordForDialogueSpan(e.target);
+                
+                // Find new spans to select
+                var selectedSpans = [];
+                var curSpan = $(e.target);
+                for (var i = 0; i < word.length; i++) {
+                    selectedSpans.push(curSpan);
+                    curSpan = curSpan.next();
+                }
+                
+                // Update selected spans
+                _.each(lastSelectedSpans, function(s) {
+                    s.removeClass('selected');
+                });
+                _.each(selectedSpans, function(s) {
+                    s.addClass('selected');
+                });
+                lastSelectedSpans = selectedSpans;
             });
         });
     </script>
