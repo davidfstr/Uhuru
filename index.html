@@ -77,6 +77,10 @@
             font-size: 16px;
             text-align: left;
         }
+        
+        #dialogue span:hover {
+            background-color: yellow;
+        }
     </style>
     
     <!-- jQuery -->
@@ -84,7 +88,33 @@
     <!-- Underscore -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
     <script>
-        // ...
+        console.log('Loading RTK database...');
+        $.ajax({
+            url: 'rtk_db.json',
+            dataType: 'json'
+        }).done(function(data, textStatus, jqXHR) {
+            console.log('RTK database loaded.');
+            window.rtkDb = data;
+        });
+        
+        $(function() {
+            // Wrap all dialogue characters in spans to make them hoverable
+            var dialogueHtml = $('#dialogue').html();
+            dialogueHtml = dialogueHtml.replace(/(.)/g, '<span>$1</span>');
+            $('#dialogue').html(dialogueHtml);
+            
+            // Hover over a dialogue character? Lookup the associated kanji.
+            $('#dialogue span').on('mouseenter', function(e) {
+                var c = $(e.target).text();
+                var info = window.rtkDb ? window.rtkDb[c] : null;
+                if (!info) {
+                    info = {'k': '?', 'c': c, 'nr': 0}
+                }
+                $('#kanji-info #keyword').text(info['k']);
+                $('#kanji-info #kanji').text(info['c']);
+                $('#kanji-info #nr').text(info['hn']);
+            });
+        });
     </script>
 </head>
 <body>
