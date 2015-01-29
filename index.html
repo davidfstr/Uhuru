@@ -82,6 +82,10 @@
         }
         
         /* Dialogue */
+        #dialogue {
+            overflow-y: scroll;
+            max-height: 700px; /* TODO: compute this somehow */
+        }
         #dialogue span.selected {
             background-color: orange;
         }
@@ -138,10 +142,12 @@
         });
         
         $(function() {
-            function rebuildDialogueSpans() {
+            function setDialogueText(dialogueText) {
                 // Wrap all dialogue characters in spans to make them hoverable
-                var dialogueHtml = $('#dialogue').html().trim();
-                dialogueHtml = dialogueHtml.replace(/(.)/g, '<span>$1</span>');
+                var dialogueHtml = dialogueText
+                    // TODO: Disallow HTML injection
+                    .replace(/([^\n])/g, '<span>$1</span>')
+                    .replace(/\n/g, '<br/>');
                 $('#dialogue').html(dialogueHtml);
                 
                 // Detect hover
@@ -306,14 +312,14 @@
             // -----------------------------------------------------------------
             // Main
             
-            rebuildDialogueSpans();
+            // Start with empty dialogue
+            setDialogueText('');
             
             // Click the dialogue edit button?
             $('#dialogue-edit-btn').click(function() {
                 if ($('#dialogue-editor').is(':visible')) {
                     // Editor -> Dialogue
-                    $('#dialogue').text($('#dialogue-editor').val());
-                    rebuildDialogueSpans();
+                    setDialogueText($('#dialogue-editor').val());
                 } else {
                     // Dialogue -> Editor
                 }
@@ -333,8 +339,8 @@
             <div id="dialogue-controls">
                 <a id="dialogue-edit-btn" class="btn btn-info" href="#">Edit</a>
             </div>
-            <div id="dialogue">「稲叢さんの料理は、自分で作るよりも美味しいから、凄く助かってる。ありがとう」</div>
-            <textarea id="dialogue-editor" rows="15">「稲叢さんの料理は、自分で作るよりも美味しいから、凄く助かってる。ありがとう」</textarea>
+            <div id="dialogue"></div>
+            <textarea id="dialogue-editor" rows="15"></textarea>
         </div>
         <div id="sidebar" class="col-md-4">
             <div id="kanji-info">
