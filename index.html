@@ -209,7 +209,7 @@
                 var allKanas = [];
                 _.each(entries, function(entry) {
                     _.each(entry.kanas, function(kana) {
-                        if (allKanas.indexOf(kana) !== -1) {
+                        if (allKanas.indexOf(kana) === -1) {
                             allKanas.push(kana);
                         }
                     });
