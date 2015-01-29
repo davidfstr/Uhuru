@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import re
 
 edict = open('../src/edict2', 'r', encoding='euc_jp')
@@ -60,11 +61,18 @@ def add_to_prefix_tree(kanji, entry_id):
             child = {}
             parent[c] = child
         parent = child
+    # TODO: Support multiple matching entries
+    #if '@' in parent:
+    #    raise ValueError(
+    #        'Prefix tree collision: %s is associated with %s and %s' % 
+    #        (kanji, parent['@'], entry_id))
     parent['@'] = entry_id
 
 for entry in entries:
     for kanji in entry['kanjis']:
         add_to_prefix_tree(kanji, entry['id'])
+    for kana in entry['kanas']:
+        add_to_prefix_tree(kana, entry['id'])
 
 with open('prefix_tree.json', 'w', encoding='utf-8') as prefix_tree_file:
     json.dump(
