@@ -152,6 +152,8 @@
                 
                 // Detect hover
                 $('#dialogue span').on('mouseenter', onDialogueSpanMouseenter);
+                
+                window.localStorage['dialogue'] = dialogueText;
             }
             
             // -----------------------------------------------------------------
@@ -312,8 +314,8 @@
             // -----------------------------------------------------------------
             // Main
             
-            // Start with empty dialogue
-            setDialogueText('');
+            // Start with saved dialogue
+            setDialogueText(window.localStorage['dialogue'] || '');
             
             // Click the dialogue edit button?
             $('#dialogue-edit-btn').click(function() {
