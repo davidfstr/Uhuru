@@ -8,7 +8,7 @@
     <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         /* Panels: Backgrounds */
-        #dialogue,
+        #dialogue-container,
         #kanji-info,
         #word-info {
             background-color: lightgray;
@@ -18,12 +18,15 @@
         body {
             margin: 1em;
         }
+        #dialogue-controls {
+            margin-bottom: .5em;
+        }
         #kanji-info {
             margin-bottom: 1em;
         }
         
         /* Panels: Heights & Padding */
-        html, body, .container, .row, #dialogue {
+        html, body, .container, .row, #dialogue-container {
             /* Dialogue Panel: Full Height */
             height: 100%;
         }
@@ -33,14 +36,14 @@
         #sidebar #word-info {
             min-height: 500px;
         }
-        #dialogue,
+        #dialogue-container,
         #sidebar #kanji-info,
         #sidebar #word-info {
             padding: 1em;
         }
         
         /* Typography: Dialogue Panel */
-        #dialogue {
+        #dialogue-container {
             font-size: 27px;
         }
         
@@ -78,14 +81,19 @@
             text-align: left;
         }
         
+        /* Dialogue */
         #dialogue span.selected {
             background-color: orange;
         }
-        /*
-        #dialogue span:hover {
-            background-color: yellow;
+        #dialogue-editor {
+            display: none; /* initially hidden */
+            
+            /* Fill entire width */
+            width: 100%;
+            -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+            -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+            box-sizing: border-box;         /* Opera/IE 8+ */
         }
-        */
     </style>
     
     <!-- jQuery -->
@@ -130,10 +138,47 @@
         });
         
         $(function() {
-            // Wrap all dialogue characters in spans to make them hoverable
-            var dialogueHtml = $('#dialogue').html().trim();
-            dialogueHtml = dialogueHtml.replace(/(.)/g, '<span>$1</span>');
-            $('#dialogue').html(dialogueHtml);
+            function rebuildDialogueSpans() {
+                // Wrap all dialogue characters in spans to make them hoverable
+                var dialogueHtml = $('#dialogue').html().trim();
+                dialogueHtml = dialogueHtml.replace(/(.)/g, '<span>$1</span>');
+                $('#dialogue').html(dialogueHtml);
+                
+                // Detect hover
+                $('#dialogue span').on('mouseenter', onDialogueSpanMouseenter);
+            }
+            
+            // -----------------------------------------------------------------
+            // Event: Dialogue Span Hovers
+            
+            var lastSelectedSpans = [];
+            
+            function onDialogueSpanMouseenter(e) {
+                // Lookup the associated kanji.
+                lookupKanjiForDialogueSpan(e.target);
+                // Lookup the associated word.
+                var word = lookupWordForDialogueSpan(e.target);
+                
+                // Find new spans to select
+                var selectedSpans = [];
+                var curSpan = $(e.target);
+                for (var i = 0; i < word.length; i++) {
+                    selectedSpans.push(curSpan);
+                    curSpan = curSpan.next();
+                }
+                
+                // Update selected spans
+                _.each(lastSelectedSpans, function(s) {
+                    s.removeClass('selected');
+                });
+                _.each(selectedSpans, function(s) {
+                    s.addClass('selected');
+                });
+                lastSelectedSpans = selectedSpans;
+            };
+            
+            // -----------------------------------------------------------------
+            // Side Panel Updates
             
             function lookupKanjiForDialogueSpan(target) {
                 var c = $(target).text();
@@ -258,31 +303,24 @@
                 return outputParts.join('');
             }
             
-            var lastSelectedSpans = [];
+            // -----------------------------------------------------------------
+            // Main
             
-            // Hover over a dialogue character?
-            $('#dialogue span').on('mouseenter', function(e) {
-                // Lookup the associated kanji.
-                lookupKanjiForDialogueSpan(e.target);
-                // Lookup the associated word.
-                var word = lookupWordForDialogueSpan(e.target);
-                
-                // Find new spans to select
-                var selectedSpans = [];
-                var curSpan = $(e.target);
-                for (var i = 0; i < word.length; i++) {
-                    selectedSpans.push(curSpan);
-                    curSpan = curSpan.next();
+            rebuildDialogueSpans();
+            
+            // Click the dialogue edit button?
+            $('#dialogue-edit-btn').click(function() {
+                if ($('#dialogue-editor').is(':visible')) {
+                    // Editor -> Dialogue
+                    $('#dialogue').text($('#dialogue-editor').val());
+                    rebuildDialogueSpans();
+                } else {
+                    // Dialogue -> Editor
                 }
                 
-                // Update selected spans
-                _.each(lastSelectedSpans, function(s) {
-                    s.removeClass('selected');
-                });
-                _.each(selectedSpans, function(s) {
-                    s.addClass('selected');
-                });
-                lastSelectedSpans = selectedSpans;
+                // Togger editor vs. dialogue
+                $('#dialogue').toggle();
+                $('#dialogue-editor').toggle();
             });
         });
     </script>
@@ -291,8 +329,12 @@
 
 <div class="container">
     <div class="row">
-        <div id="dialogue" class="col-md-8">
-            「稲叢さんの料理は、自分で作るよりも美味しいから、凄く助かってる。ありがとう」
+        <div id="dialogue-container" class="col-md-8">
+            <div id="dialogue-controls">
+                <a id="dialogue-edit-btn" class="btn btn-info" href="#">Edit</a>
+            </div>
+            <div id="dialogue">「稲叢さんの料理は、自分で作るよりも美味しいから、凄く助かってる。ありがとう」</div>
+            <textarea id="dialogue-editor" rows="15">「稲叢さんの料理は、自分で作るよりも美味しいから、凄く助かってる。ありがとう」</textarea>
         </div>
         <div id="sidebar" class="col-md-4">
             <div id="kanji-info">
