@@ -7,6 +7,7 @@ edict = open('../src/edict2', 'r', encoding='euc_jp')
 
 _EDICT_LINE_RE = re.compile(r'^([^\[]+)(?: \[([^\]]+)])? $')
 _ENTRY_ID_RE = re.compile(r'^EntL([0-9]+)X?$')
+_PARENS_RE = re.compile(r'\([^)]+\)')
 
 def parse_edict2_line(line):
     segments = line.split('/')
@@ -25,6 +26,10 @@ def parse_edict2_line(line):
         kana_list = kana_list.split(';')
     else:
         kana_list = []
+    
+    # Remove "(P)" and other pollutants
+    kanji_list = [_PARENS_RE.sub('', k) for k in kanji_list]
+    kana_list = [_PARENS_RE.sub('', k) for k in kana_list]
     
     m = _ENTRY_ID_RE.search(entry_id)
     entry_id = m.group(1)
