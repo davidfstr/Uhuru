@@ -120,6 +120,15 @@
             window.edictEntries = data;
         });
         
+        console.log('Loading stops...');
+        $.ajax({
+            url: 'stops.json',
+            dataType: 'json'
+        }).done(function(data, textStatus, jqXHR) {
+            console.log('Stops loaded.');
+            window.stops = data;
+        });
+        
         $(function() {
             // Wrap all dialogue characters in spans to make them hoverable
             var dialogueHtml = $('#dialogue').html().trim();
@@ -128,10 +137,17 @@
             
             function lookupKanjiForDialogueSpan(target) {
                 var c = $(target).text();
-                var info = window.rtkDb ? window.rtkDb[c] : null;
-                if (!info) {
-                    info = {'k': '?', 'c': c, 'hn': 0}
+                
+                var info;
+                if (window.stops.indexOf(c) !== -1) {
+                    info = {'k': '\u3000', 'c': '\u3000', 'hn': 0};
+                } else {
+                    info = window.rtkDb && window.rtkDb[c];
+                    if (!info) {
+                        info = {'k': '?', 'c': c, 'hn': 0}
+                    }
                 }
+                
                 $('#kanji-info #keyword').text(info['k']);
                 $('#kanji-info #kanji').text(info['c']);
                 $('#kanji-info #nr').text(info['hn']);
