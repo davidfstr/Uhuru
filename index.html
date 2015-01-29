@@ -31,7 +31,7 @@
             height: 100%;
         }
         #sidebar #word-info {
-            height: 500px;
+            min-height: 500px;
         }
         #dialogue,
         #sidebar #kanji-info,
@@ -149,8 +149,8 @@
                 }
                 
                 // Find longest prefix of 'characters' that is a word
-                var longestMatchWord = '';
-                var longestMatchEntry = '0';
+                var matchWord = '';
+                var matchEntryIds = ['0'];
                 var parent = window.prefixTreeRoot;
                 for (var i = 0; i<characters.length; i++) {
                     var c = characters[i];
@@ -158,32 +158,88 @@
                     if (child) {
                         parent = child;
                         if (parent['@']) {
-                            longestMatchWord = characters.slice(0, i + 1).join('');
-                            longestMatchEntry = parent['@'];
+                            matchWord = characters.slice(0, i + 1).join('');
+                            matchEntryIds = parent['@'];
                         }
                     } else {
                         break;
                     }
                 }
                 
-                // Lookup entry
-                var entry = window.edictEntries[longestMatchEntry];
-                if (!entry) {
-                    entry = {
+                // Lookup entries
+                var matchEntries = _.map(matchEntryIds, function(entryId) {
+                    return window.edictEntries[entryId] || {
                         'kanjis': [],
                         'kanas': [],
                         'glosses': [],
                         'id': '0'
-                    }
-                }
+                    };
+                });
                 
                 // Update word info box with entry data
-                $('#word-info #word').text(longestMatchWord);
-                $('#word-info #furigana').text(entry.kanas.join('、'));
-                // FIXME: Disallow HTML injection
-                $('#word-info #definition').html(entry.glosses.join('<br/>'));
+                $('#word-info #word').text(matchWord);
+                // TODO: Disallow HTML injection
+                $('#word-info #furigana').html(formatFuriganaForEntries(matchEntries));
+                // TODO: Disallow HTML injection
+                $('#word-info #definition').html(_.map(matchEntries, function(entry) {
+                    return formatDefinitionForEntry(entry);
+                }).join('<hr/>'));
                 
-                return longestMatchWord;
+                return matchWord;
+            }
+            
+            function formatFuriganaForEntries(entries) {
+                // Gather all unique kana
+                var allKanas = [];
+                _.each(entries, function(entry) {
+                    _.each(entry.kanas, function(kana) {
+                        if (allKanas.indexOf(kana) !== -1) {
+                            allKanas.push(kana);
+                        }
+                    });
+                });
+                
+                return allKanas.join('、');
+            }
+            
+            function formatDefinitionForEntry(entry) {
+                var hasBullets = false;
+                _.each(entry.glosses, function(gloss) {
+                    if (gloss.indexOf('(1)') !== -1) {
+                        hasBullets = true;
+                    }
+                });
+                
+                var firstGloss = true;
+                var insideBullets = false;
+                var outputParts = _.map(entry.glosses, function(gloss) {
+                    var groups = gloss.match(/^(.*?)\(([0-9]+)\) (.*)$/);
+                    if (groups) {
+                        // Found a bullet
+                        result = '<b>' + groups[2] + '.</b> ' + groups[1] + groups[3];
+                        if (insideBullets) {
+                            result = '<br/>' + result; // close previous bullet
+                        }
+                        
+                        insideBullets = true;
+                    } else {
+                        if (insideBullets) {
+                            // Bullet continuation
+                            result = '; ' + gloss; 
+                        } else {
+                            // Before the first bullet
+                            if (firstGloss) {
+                                result = gloss;
+                            } else {
+                                result = '; ' + gloss;
+                            }
+                        }
+                    }
+                    
+                    firstGloss = false;
+                    return result;
+                });
+                return outputParts.join('');
             }
             
             var lastSelectedSpans = [];

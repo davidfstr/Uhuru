@@ -61,12 +61,10 @@ def add_to_prefix_tree(kanji, entry_id):
             child = {}
             parent[c] = child
         parent = child
-    # TODO: Support multiple matching entries
-    #if '@' in parent:
-    #    raise ValueError(
-    #        'Prefix tree collision: %s is associated with %s and %s' % 
-    #        (kanji, parent['@'], entry_id))
-    parent['@'] = entry_id
+    
+    matches = parent.get('@', [])
+    matches.append(entry_id)
+    parent['@'] = matches
 
 for entry in entries:
     for kanji in entry['kanjis']:
