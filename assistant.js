@@ -1,6 +1,6 @@
 console.log('Loading RTK database...');
 $.ajax({
-    url: 'rtk_db.json',
+    url: 'data/rtk_db.json',
     dataType: 'json'
 }).done(function(data, textStatus, jqXHR) {
     console.log('RTK database loaded.');
@@ -9,7 +9,7 @@ $.ajax({
 
 console.log('Loading prefix tree...');
 $.ajax({
-    url: 'prefix_tree.json',
+    url: 'data/prefix_tree.json',
     dataType: 'json'
 }).done(function(data, textStatus, jqXHR) {
     console.log('Prefix tree loaded.');
@@ -18,7 +18,7 @@ $.ajax({
 
 console.log('Loading EDICT entries...');
 $.ajax({
-    url: 'edict_entries.json',
+    url: 'data/edict_entries.json',
     dataType: 'json'
 }).done(function(data, textStatus, jqXHR) {
     console.log('EDICT entries loaded.');
@@ -27,7 +27,7 @@ $.ajax({
 
 console.log('Loading stops...');
 $.ajax({
-    url: 'stops.json',
+    url: 'data/stops.json',
     dataType: 'json'
 }).done(function(data, textStatus, jqXHR) {
     console.log('Stops loaded.');

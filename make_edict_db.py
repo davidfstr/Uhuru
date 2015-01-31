@@ -74,7 +74,7 @@ for entry in entries:
         add_to_prefix_tree(kana, entry['id'])
 
 print('Writing prefix tree...')
-with open('prefix_tree.json', 'w', encoding='utf-8') as prefix_tree_file:
+with open('data/prefix_tree.json', 'w', encoding='utf-8') as prefix_tree_file:
     json.dump(
         prefix_tree_root, prefix_tree_file,
         ensure_ascii=False,    # minify
@@ -87,7 +87,7 @@ with open('prefix_tree.json', 'w', encoding='utf-8') as prefix_tree_file:
 if '--skip-entries' not in sys.argv:
     print('Writing EDICT entries...')
     edict_entries = {entry['id'] : entry for entry in entries}
-    with open('edict_entries.json', 'w', encoding='utf-8') as edict_entries_file:
+    with open('data/edict_entries.json', 'w', encoding='utf-8') as edict_entries_file:
         json.dump(
             edict_entries, edict_entries_file,
             ensure_ascii=False,    # minify
