@@ -77,8 +77,24 @@ html, body, .container, .row, #dialogue-container {
     overflow-y: scroll;
     max-height: 700px; /* TODO: compute this somehow */
 }
-#dialogue span.selected {
+#dialogue .hover-selected {
     background-color: orange;
+}
+#dialogue .click-selected {
+    background-color: #bbbbff;
+}
+#dialogue .hover-selected.click-selected {
+    background-color: none;
+    background: repeating-linear-gradient(
+        45deg,
+        orange,
+        orange 10px,
+        #bbbbff 10px,
+        #bbbbff 20px
+    );
+}
+#dialogue .click-selected-last {
+    margin-right: .25em;
 }
 #dialogue-editor {
     display: none; /* initially hidden */

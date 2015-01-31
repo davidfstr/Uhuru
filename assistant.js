@@ -38,11 +38,13 @@ $(function() {
         $('#dialogue span').on('mouseenter', onDialogueSpanMouseenter);
         $('#dialogue span').on('click', onDialogueSpanClick);
         
+        $('#dialogue-editor').val(dialogueText);
+        
         window.localStorage['dialogue'] = dialogueText;
     }
     
     // -----------------------------------------------------------------
-    // Event: Dialogue Span Interactions
+    // Event: Dialogue Span Hover
     
     var lastSelectedSpans = [];
     
@@ -64,18 +66,82 @@ $(function() {
         
         // Update selected spans
         _.each(lastSelectedSpans, function(s) {
-            s.removeClass('selected');
+            s.removeClass('hover-selected');
         });
         _.each(selectedSpans, function(s) {
-            s.addClass('selected');
+            s.addClass('hover-selected');
         });
         lastSelectedSpans = selectedSpans;
     }
     
+    // -----------------------------------------------------------------
+    // Event: Dialogue Span Click
+    
     function onDialogueSpanClick(e) {
-        // TODO: implement
-        console.log('click!');
+        var dialogueSpan = e.target;
+        
+        var matchingWord = findMatchingWord(dialogueSpan);
+        var selectedSpans = getSpanSequenceStartingAt(
+            dialogueSpan,
+            matchingWord.word.length);
+        
+        if (selectedSpans[0].hasClass('click-selected')) {
+            _.each(selectedSpans, function(s) {
+                s.removeClass('click-selected');
+                s.removeClass('click-selected-last');
+            });
+        } else {
+            _.each(selectedSpans, function(s) {
+                s.addClass('click-selected');
+            });
+            var lastS = selectedSpans[selectedSpans.length - 1];
+            lastS.addClass('click-selected-last');
+        }
+        
+        window.localStorage['selectedRanges'] = 
+            JSON.stringify(getRangesSelectedByClick());
     }
+    
+    function getRangesSelectedByClick() {
+        var ranges = [];
+        var lastRangeStart = -1;
+        
+        var spans = $('#dialogue span');
+        for (var i = 0; i < spans.length; i++) {
+            if ($(spans[i]).hasClass('click-selected') && 
+                lastRangeStart === -1)
+            {
+                lastRangeStart = i;
+            }
+            if ($(spans[i]).hasClass('click-selected-last')) {
+                ranges.push([lastRangeStart, i - lastRangeStart + 1]);
+                lastRangeStart = -1;
+            }
+        }
+        
+        return ranges;
+    }
+    
+    function setRangesSelectedByClick(ranges) {
+        var spans = $('#dialogue span');
+        
+        _.each(ranges, function(range) {
+            var start = range[0];
+            var length = range[1];
+            for (var i = start, n = length; n > 0; i++, n--) {
+                $(spans[i]).addClass('click-selected');
+                if (n == 1) {
+                    $(spans[i]).addClass('click-selected-last');
+                }
+            }
+        });
+        
+        window.localStorage['selectedRanges'] = 
+            JSON.stringify(getRangesSelectedByClick());
+    }
+    
+    // -----------------------------------------------------------------
+    // Utility
     
     function getSpanSequenceStartingAt(firstSpan, numSpans) {
         var selectedSpans = [];
@@ -222,13 +288,19 @@ $(function() {
     // Main
     
     // Start with saved dialogue
-    setDialogueText(window.localStorage['dialogue'] || '');
+    setDialogueText(
+        window.localStorage['dialogue'] || '');
+    setRangesSelectedByClick(
+        window.localStorage['selectedRanges']
+            ? JSON.parse(window.localStorage['selectedRanges'])
+            : []);
     
     // Click the dialogue edit button?
     $('#dialogue-edit-btn').click(function() {
         if ($('#dialogue-editor').is(':visible')) {
             // Editor -> Dialogue
             setDialogueText($('#dialogue-editor').val());
+            setRangesSelectedByClick([]);
         } else {
             // Dialogue -> Editor
         }
