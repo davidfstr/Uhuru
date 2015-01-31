@@ -1,38 +1,29 @@
-console.log('Loading RTK database...');
-$.ajax({
-    url: 'data/rtk_db.json',
-    dataType: 'json'
-}).done(function(data, textStatus, jqXHR) {
-    console.log('RTK database loaded.');
-    window.rtkDb = data;
-});
+// -----------------------------------------------------------------
+// Data
 
-console.log('Loading prefix tree...');
-$.ajax({
-    url: 'data/prefix_tree.json',
-    dataType: 'json'
-}).done(function(data, textStatus, jqXHR) {
-    console.log('Prefix tree loaded.');
-    window.prefixTreeRoot = data;
-});
+var _data = {};
 
-console.log('Loading EDICT entries...');
-$.ajax({
-    url: 'data/edict_entries.json',
-    dataType: 'json'
-}).done(function(data, textStatus, jqXHR) {
-    console.log('EDICT entries loaded.');
-    window.edictEntries = data;
-});
+function loadDataAsync(varName, url, description) {
+    console.log('Loading ' + description + '...');
+    $.ajax({
+        url: url,
+        dataType: 'json'
+    }).done(function(data, textStatus, jqXHR) {
+        console.log('Loaded ' + description + '.');
+        _data[varName] = data;
+    });
+}
 
-console.log('Loading stops...');
-$.ajax({
-    url: 'data/stops.json',
-    dataType: 'json'
-}).done(function(data, textStatus, jqXHR) {
-    console.log('Stops loaded.');
-    window.stops = data;
-});
+function getData(varName) {
+    return _data[varName];
+}
+
+loadDataAsync('rtkDb', 'data/rtk_db.json', 'RTK database');
+loadDataAsync('prefixTreeRoot', 'data/prefix_tree.json', 'prefix tree');
+loadDataAsync('edictEntries', 'data/edict_entries.json', 'EDICT entries');
+loadDataAsync('stops', 'data/stops.json', 'stops');
+
+// -----------------------------------------------------------------
 
 $(function() {
     function setDialogueText(dialogueText) {
@@ -85,10 +76,10 @@ $(function() {
         var c = $(target).text();
         
         var info;
-        if (window.stops.indexOf(c) !== -1) {
+        if (getData('stops').indexOf(c) !== -1) {
             info = {'k': '\u3000', 'c': '\u3000', 'hn': 0};
         } else {
-            info = window.rtkDb && window.rtkDb[c];
+            info = getData('rtkDb')[c];
             if (!info) {
                 info = {'k': '?', 'c': c, 'hn': 0}
             }
@@ -113,7 +104,7 @@ $(function() {
         // Find longest prefix of 'characters' that is a word
         var matchWord = '';
         var matchEntryIds = ['0'];
-        var parent = window.prefixTreeRoot;
+        var parent = getData('prefixTreeRoot');
         for (var i = 0; i<characters.length; i++) {
             var c = characters[i];
             var child = parent[c];
@@ -130,7 +121,7 @@ $(function() {
         
         // Lookup entries
         var matchEntries = _.map(matchEntryIds, function(entryId) {
-            return window.edictEntries[entryId] || {
+            return getData('edictEntries')[entryId] || {
                 'kanjis': [],
                 'kanas': [],
                 'glosses': [],
