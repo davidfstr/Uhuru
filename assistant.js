@@ -34,30 +34,33 @@ $(function() {
             .replace(/\n/g, '<br/>');
         $('#dialogue').html(dialogueHtml);
         
-        // Detect hover
+        // Detect interactions with dialogue spans
         $('#dialogue span').on('mouseenter', onDialogueSpanMouseenter);
+        $('#dialogue span').on('click', onDialogueSpanClick);
         
         window.localStorage['dialogue'] = dialogueText;
     }
     
     // -----------------------------------------------------------------
-    // Event: Dialogue Span Hovers
+    // Event: Dialogue Span Interactions
     
     var lastSelectedSpans = [];
     
     function onDialogueSpanMouseenter(e) {
+        var dialogueSpan = e.target;
+        
         // Lookup the associated kanji.
-        lookupKanjiForDialogueSpan(e.target);
+        var character = $(dialogueSpan).text();
+        displayKanjiInfo(character);
+        
         // Lookup the associated word.
-        var word = lookupWordForDialogueSpan(e.target);
+        var matchingWord = findMatchingWord(dialogueSpan);
+        displayMatchingWordInfo(matchingWord);
         
         // Find new spans to select
-        var selectedSpans = [];
-        var curSpan = $(e.target);
-        for (var i = 0; i < word.length; i++) {
-            selectedSpans.push(curSpan);
-            curSpan = curSpan.next();
-        }
+        var selectedSpans = getSpanSequenceStartingAt(
+            dialogueSpan,
+            matchingWord.word.length);
         
         // Update selected spans
         _.each(lastSelectedSpans, function(s) {
@@ -67,14 +70,28 @@ $(function() {
             s.addClass('selected');
         });
         lastSelectedSpans = selectedSpans;
-    };
+    }
+    
+    function onDialogueSpanClick(e) {
+        // TODO: implement
+        console.log('click!');
+    }
+    
+    function getSpanSequenceStartingAt(firstSpan, numSpans) {
+        var selectedSpans = [];
+        var curSpan = $(firstSpan);
+        for (var i = 0; i < numSpans; i++) {
+            selectedSpans.push(curSpan);
+            curSpan = curSpan.next();
+        }
+        
+        return selectedSpans;
+    }
     
     // -----------------------------------------------------------------
     // Side Panel Updates
     
-    function lookupKanjiForDialogueSpan(target) {
-        var c = $(target).text();
-        
+    function displayKanjiInfo(c) {
         var info;
         if (getData('stops').indexOf(c) !== -1) {
             info = {'k': '\u3000', 'c': '\u3000', 'hn': 0};
@@ -88,14 +105,12 @@ $(function() {
         $('#kanji-info #keyword').text(info['k']);
         $('#kanji-info #kanji').text(info['c']);
         $('#kanji-info #nr').text(info['hn']);
-        
-        return c;
     }
     
-    function lookupWordForDialogueSpan(target) {
+    function findMatchingWord(dialogueSpan) {
         // Find the character, and all characters after it
         var characters = [];
-        var curSpan = $(target);
+        var curSpan = $(dialogueSpan);
         while (curSpan.length > 0) {
             characters.push(curSpan.text());
             curSpan = curSpan.next();
@@ -129,6 +144,16 @@ $(function() {
             };
         });
         
+        return {
+            word: matchWord,
+            entries: matchEntries
+        };
+    }
+    
+    function displayMatchingWordInfo(matchingWord) {
+        var matchWord = matchingWord.word;
+        var matchEntries = matchingWord.entries;
+        
         // Update word info box with entry data
         $('#word-info #word').text(matchWord);
         // TODO: Disallow HTML injection
@@ -137,8 +162,6 @@ $(function() {
         $('#word-info #definition').html(_.map(matchEntries, function(entry) {
             return formatDefinitionForEntry(entry);
         }).join('<hr/>'));
-        
-        return matchWord;
     }
     
     function formatFuriganaForEntries(entries) {
