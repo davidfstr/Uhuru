@@ -1,0 +1,91 @@
+/* Panels: Backgrounds */
+#dialogue-container,
+#kanji-info,
+#word-info {
+    background-color: lightgray;
+}
+
+/* Panels: Spacing */
+body {
+    margin: 1em;
+}
+#dialogue-controls {
+    margin-bottom: .5em;
+}
+#kanji-info {
+    margin-bottom: 1em;
+}
+
+/* Panels: Heights & Padding */
+html, body, .container, .row, #dialogue-container {
+    /* Dialogue Panel: Full Height */
+    height: 100%;
+}
+#sidebar {
+    height: 100%;
+}
+#sidebar #word-info {
+    min-height: 500px;
+}
+#dialogue-container,
+#sidebar #kanji-info,
+#sidebar #word-info {
+    padding: 1em;
+}
+
+/* Typography: Dialogue Panel */
+#dialogue-container {
+    font-size: 27px;
+}
+
+/* Typography: Kanji Info Panel */
+#kanji-info {
+    font-family: arial;
+    font-size: 20px;
+    text-align: center;
+    color: black;
+}
+#kanji-info #kanji {
+    font-family: Hiragino Kaku Gothic Pro, Mincho;
+    font-size: 150px;
+    line-height: 1.1em
+}
+
+/* Typography: Word Info Panel */
+#word-info {
+    font-family: arial;
+    font-size: 20px;
+    text-align: center;
+    color: black;
+}
+#word-info #furigana {
+    font-size: 27px;
+    margin-top: -.5em;
+    margin-bottom: .5em;
+}
+#word-info #word {
+    font-size: 60px;
+}
+#word-info #definition {
+    font-family: georgia;
+    font-size: 16px;
+    text-align: left;
+}
+
+/* Dialogue */
+#dialogue {
+    overflow-y: scroll;
+    max-height: 700px; /* TODO: compute this somehow */
+}
+#dialogue span.selected {
+    background-color: orange;
+}
+#dialogue-editor {
+    display: none; /* initially hidden */
+    
+    /* Fill entire width */
+    width: 100%;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
