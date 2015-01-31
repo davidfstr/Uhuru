@@ -2,6 +2,7 @@
 
 import json
 import re
+import sys
 
 edict = open('../src/edict2', 'r', encoding='euc_jp')
 
@@ -41,17 +42,11 @@ def parse_edict2_line(line):
         'id': entry_id
     }
 
-# Can we parse everything?
+print('Reading EDICT database...')
 edict.readline() # skip header
 entries = []
 for line in edict:
     entries.append(parse_edict2_line(line))
-
-"""
-from pprint import pprint
-line = '座 [ざ] /(n,n-suf) (1) seat/place/position/(2) status/(3) gathering/group/(4) stand/pedestal/platform/(5) (historical) trade guild/(suf) (6) attaches to the names of theatres, theatrical troupes, and constellations/(suf,ctr) (7) (See 里神楽) counter for theatres, deities, Buddhist images, tall mountains, and satokagura songs/(P)/EntL1291770X/\n'
-pprint(parse_edict2_line(line))
-"""
 
 # ------------------------------------------------------------------------------
 # Prefix Tree
@@ -71,24 +66,30 @@ def add_to_prefix_tree(kanji, entry_id):
     matches.append(entry_id)
     parent['@'] = matches
 
+print('Constructing prefix tree...')
 for entry in entries:
     for kanji in entry['kanjis']:
         add_to_prefix_tree(kanji, entry['id'])
     for kana in entry['kanas']:
         add_to_prefix_tree(kana, entry['id'])
 
+print('Writing prefix tree...')
 with open('prefix_tree.json', 'w', encoding='utf-8') as prefix_tree_file:
     json.dump(
         prefix_tree_root, prefix_tree_file,
-        ensure_ascii=False,
-        separators=(',',':'))
+        ensure_ascii=False,    # minify
+        separators=(',',':'),  # minify
+        check_circular=False)  # performance
 
 # ------------------------------------------------------------------------------
 # Entry List
 
-edict_entries = {entry['id'] : entry for entry in entries}
-with open('edict_entries.json', 'w', encoding='utf-8') as edict_entries_file:
-    json.dump(
-        edict_entries, edict_entries_file,
-        ensure_ascii=False,
-        separators=(',',':'))
+if '--skip-entries' not in sys.argv:
+    print('Writing EDICT entries...')
+    edict_entries = {entry['id'] : entry for entry in entries}
+    with open('edict_entries.json', 'w', encoding='utf-8') as edict_entries_file:
+        json.dump(
+            edict_entries, edict_entries_file,
+            ensure_ascii=False,    # minify
+            separators=(',',':'),  # minify
+            check_circular=False)  # performance
