@@ -51,10 +51,13 @@ for line in edict:
 # ------------------------------------------------------------------------------
 # Inflection
 
+from nhconj import nhconj
+
 VERB_TYPE_RE = re.compile(r'^\((v[^)]*)\)')
 
 # Yields inflected forms for the specified entry.
 def inflect(entry):
+    # If a verb, inflect it as a verb
     m = VERB_TYPE_RE.search(entry['glosses'][0])
     if m:
         verb_types = m.group(1).split(',')
@@ -79,46 +82,44 @@ def inflect(entry):
         )
         
         try:
-            # Yield the て-forms
             for kanji in entry['kanjis']:
-                yield te_form(kanji, is_ru_verb)
+                yield from inflect_verb({
+                    'dict_verb': kanji,
+                    'is_ru_verb': is_ru_verb
+                })
             for kana in entry['kanas']:
-                yield te_form(kana, is_ru_verb)
+                yield from inflect_verb({
+                    'dict_verb': kana,
+                    'is_ru_verb': is_ru_verb
+                })
         except:
+            print('Verb: %s' % entry['kanas'])
             print('Verb types: ' + ','.join(verb_types))
             raise
 
-
-# Given a verb in dictionary form, returns its possible て-forms.
-# Rules are based on Genki I, 2nd Ed, §6.1.
-def te_form(dict_verb, is_ru_verb):
-    if dict_verb[-2:] in ['する']:
-        return dict_verb[:-2] + 'して'
-    if dict_verb[-2:] in ['くる']:
-        return dict_verb[:-2] + 'きて'
+def inflect_verb(verb_entry):
+    # Eventually we may omit the stem if all other in-the-wild
+    # conjugations are identified and implemented.
+    yield nhconj.stem(verb_entry)
     
-    if dict_verb in ['いく', '行く']:
-        return dict_verb[:-1] + 'って'
+    yield nhconj.long_present_aff(verb_entry)
+    yield nhconj.long_present_neg(verb_entry)
+    yield nhconj.long_past_aff(verb_entry)
+    yield nhconj.long_past_neg(verb_entry)
     
-    if dict_verb[-1] in ['る']:
-        if is_ru_verb:
-            return dict_verb[:-1] + 'て'
-        else:
-            return dict_verb[:-1] + 'って'
+    yield nhconj.short_present_aff(verb_entry)
+    yield nhconj.short_present_neg(verb_entry)
+    yield nhconj.short_past_aff(verb_entry)
+    yield nhconj.short_past_neg(verb_entry)
     
-    if dict_verb[-1] in ['う', 'つ', 'る']:
-        return dict_verb[:-1] + 'って'
-    if dict_verb[-1] in ['む', 'ぶ', 'ぬ']:
-        return dict_verb[:-1] + 'んで'
-    if dict_verb[-1] in ['く']:
-        return dict_verb[:-1] + 'いて'
-    if dict_verb[-1] in ['ぐ']:
-        return dict_verb[:-1] + 'いで'
-    if dict_verb[-1] in ['す']:
-        return dict_verb[:-1] + 'して'
+    yield nhconj.potential(verb_entry)
+    yield nhconj.volitional(verb_entry)
+    yield nhconj.passive(verb_entry)
     
-    raise ValueError(
-        'Expected verb in dictionary form: ' + dict_verb)
+    yield nhconj.te(verb_entry)
+    
+    yield nhconj.tai(verb_entry)
+    yield nhconj.tari(verb_entry)
 
 
 # Try to inflect everything
