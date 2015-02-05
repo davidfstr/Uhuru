@@ -117,9 +117,13 @@ def inflect_verb(verb_entry):
     yield nhconj.passive(verb_entry)
     
     yield nhconj.te(verb_entry)
+    yield nhconj.te_neg(verb_entry)
     
     yield nhconj.tai(verb_entry)
     yield nhconj.tari(verb_entry)
+    
+    yield nhconj.chau(verb_entry)
+    #yield nhconj.chimau(verb_entry)
 
 
 # Try to inflect everything
