@@ -72,11 +72,28 @@ html, body, .container, .row, #dialogue-container {
     text-align: left;
 }
 
+/* Dialogue Controls */
+#kanji-range {
+    font-size: 12pt;
+    float: right;
+}
+#kanji-range #kr-slider {
+    width: 200px;
+}
+
+
 /* Dialogue */
 #dialogue {
     overflow-y: scroll;
     max-height: 700px; /* TODO: compute this somehow */
 }
+#dialogue .highlight-on {
+    background-color: #bbbbff;
+}
+#dialogue .highlight-off {
+    background-color: red;
+}
+/*
 #dialogue .hover-selected {
     background-color: orange;
 }
@@ -96,6 +113,7 @@ html, body, .container, .row, #dialogue-container {
 #dialogue .click-selected-last {
     margin-right: .25em;
 }
+*/
 #dialogue-editor {
     display: none; /* initially hidden */
     

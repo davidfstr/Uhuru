@@ -158,6 +158,14 @@ $(function() {
     // Side Panel Updates
     
     function displayKanjiInfo(c) {
+        var info = getKanjiInfo(c);
+        
+        $('#kanji-info #keyword').text(info['k']);
+        $('#kanji-info #kanji').text(info['c']);
+        $('#kanji-info #nr').text(info['hn']);
+    }
+    
+    function getKanjiInfo(c) {
         var info;
         if (getData('stops').indexOf(c) !== -1) {
             info = {'k': '\u3000', 'c': '\u3000', 'hn': 0};
@@ -167,10 +175,7 @@ $(function() {
                 info = {'k': '?', 'c': c, 'hn': 0}
             }
         }
-        
-        $('#kanji-info #keyword').text(info['k']);
-        $('#kanji-info #kanji').text(info['c']);
-        $('#kanji-info #nr').text(info['hn']);
+        return info;
     }
     
     function findMatchingWord(dialogueSpan) {
@@ -308,5 +313,42 @@ $(function() {
         // Togger editor vs. dialogue
         $('#dialogue').toggle();
         $('#dialogue-editor').toggle();
+    });
+    
+    $('#kr-slider').slider({
+        min: 0,
+        max: 2042,
+        value: 0
+    });
+    $('#kr-slider').on('slide', function(e, ui) {
+        var value = ui.value;
+        
+        // Update slider text
+        var strValue = value;
+        strValue = '' + strValue;
+        while (strValue.length < 4) {
+            strValue = '0' + strValue;
+        }
+        $('#kr-slider-value').text(strValue);
+        
+        // Update highlighted kanji
+        if (value === 0) {
+            $('#dialogue span').removeClass('highlight-on').removeClass('highlight-off');
+        } else {
+            _.each($('#dialogue span'), function(span) {
+                span = $(span);
+                
+                var info = getKanjiInfo(span.text());
+                if (info['hn'] !== 0) {
+                    if (info['hn'] <= value) {
+                        span.addClass('highlight-on');
+                        span.removeClass('highlight-off');
+                    } else {
+                        span.addClass('highlight-off');
+                        span.removeClass('highlight-on');
+                    }
+                }
+            });
+        }
     });
 });

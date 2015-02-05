@@ -13,6 +13,10 @@
     <!-- Underscore -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
     <script src="assistant.js"></script>
+    
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css" />
+    <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
 </head>
 <body>
 
@@ -21,6 +25,10 @@
         <div id="dialogue-container" class="col-md-8">
             <div id="dialogue-controls">
                 <a id="dialogue-edit-btn" class="btn btn-info" href="#">Edit</a>
+                <div id="kanji-range">
+                    Highlight kanji below <span id="kr-slider-value">0000</span>
+                    <div id="kr-slider"></div>
+                </div>
             </div>
             <div id="dialogue"></div>
             <textarea id="dialogue-editor" rows="15"></textarea>
