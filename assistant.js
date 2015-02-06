@@ -331,7 +331,8 @@ $(function() {
         }
         $('#kr-slider-value').text(strValue);
         
-        // Update highlighted kanji
+        // Update highlighted kanji. Collect unhighlighted ones.
+        var highlightedOffKanji = []
         if (value === 0) {
             $('#dialogue span').removeClass('highlight-on').removeClass('highlight-off');
         } else {
@@ -346,9 +347,27 @@ $(function() {
                     } else {
                         span.addClass('highlight-off');
                         span.removeClass('highlight-on');
+                        
+                        if (highlightedOffKanji.indexOf(info['c']) === -1) {
+                            highlightedOffKanji.push(info['c']);
+                        }
                     }
                 }
             });
         }
+        
+        // Sort unhighlighted kanji in Heisig order
+        function sortOrderForKanji(c) {
+            var info = getKanjiInfo(c);
+            return info['hn'];
+        }
+        highlightedOffKanji.sort(function(a, b) {
+            return -(sortOrderForKanji(a) - sortOrderForKanji(b));
+        });
+        
+        // Display unhighlighted kanji
+        // TODO: Always display all kanji (in increasing Heisig order) and just
+        //       change the ones which are highlighted.
+        $('#furigana').text(highlightedOffKanji.join(''));
     });
 });
