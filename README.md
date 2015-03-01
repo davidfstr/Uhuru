@@ -7,6 +7,8 @@ to immediately look up their meanings based on the [EDICT] dictionary.
 Kanji characters are also looked up based on the [Remembering the Kanji]
 keywords.
 
+<img src="README/screenshot.png" />
+
 Uhuru is named after the original Shahili word that inspired the
 name of [Uhura] from the original Star Trek series, a famous translator.
 Since "uhuru" ends in -ru, it reminds me of a る-verb.
