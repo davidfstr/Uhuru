@@ -4,7 +4,7 @@ import json
 import re
 import sys
 
-edict = open('../src/edict2', 'r', encoding='euc_jp')
+edict = open('contrib/edict2', 'r', encoding='euc_jp')
 
 _EDICT_LINE_RE = re.compile(r'^([^\[]+)(?: \[([^\]]+)])? $')
 _ENTRY_ID_RE = re.compile(r'^EntL([0-9]+)X?$')

@@ -2,7 +2,7 @@
 
 import json
 
-rtk_path = '../src/RTK.tsv'
+rtk_path = 'contrib/RTK.tsv'
 rtk_content = open(rtk_path, 'r', encoding='utf-8').read()
 
 rtk_lines = rtk_content.strip().split('\n')
