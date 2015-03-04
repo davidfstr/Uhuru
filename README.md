@@ -1,5 +1,7 @@
 # Uhuru
 
+<img src="README/icon-narrow.png" title="Uhuru icon" align="right" />
+
 Uhuru is a translation assistant for reading Japanese text quickly.
 
 Just paste in some Japanese text or dialogue, and hover over some words
